@@ -30,8 +30,11 @@ public class Offer {
     private UUID psychologistId;
 
     public void subscribe(UUID psychologistId) {
-        if (!isAvailable()) {
-            throw new IllegalStateException("La oferta no está disponible");
+        if (!isOpen()) {
+            throw new IllegalStateException("La oferta no está en estado OPEN");
+        }
+        if (!isInDateRange()) {
+            throw new IllegalStateException("La oferta aún no está habilitada o ya venció");
         }
         this.psychologistId = psychologistId;
         this.status = OfferStatus.TAKEN;
@@ -45,9 +48,15 @@ public class Offer {
     }
 
     public boolean isAvailable() {
+        return isOpen() && isInDateRange();
+    }
+
+    private boolean isOpen() {
+        return status.equals(OfferStatus.OPEN);
+    }
+
+    private boolean isInDateRange() {
         LocalDate today = LocalDate.now();
-        return status.equals(OfferStatus.OPEN)
-                && !today.isBefore(startDate)
-                && !today.isAfter(endDate);
+        return !today.isBefore(startDate) && !today.isAfter(endDate);
     }
 }
