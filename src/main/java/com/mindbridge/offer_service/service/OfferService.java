@@ -28,13 +28,13 @@ public class OfferService {
         Offer saved = offerRepository.save(offer);
         return toResponseDTO(saved);
     }
-
+    @Transactional
     public OfferResponseDTO cancelOffer(UUID id){
         Offer offer = offerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Oferta no encontrada"));
         offer.cancel();
         Offer saved = offerRepository.save(offer);
-        return toResponseDTO(saved)
+        return toResponseDTO(saved);
 
 
     }
