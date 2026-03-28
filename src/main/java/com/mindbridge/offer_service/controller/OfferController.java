@@ -82,4 +82,14 @@ public class OfferController {
         List<OfferResponseDTO> response = offerService.getActiveOffers();
         return ResponseEntity.ok(response);
     }
+
+    @Operation(
+            summary = "Ver psicólogos en promoción",
+            description = "Retorna todas las ofertas TAKEN — psicólogos actualmente en oferta visibles para el paciente."
+    )
+    @ApiResponse(responseCode = "200", description = "Lista de ofertas tomadas")
+    @GetMapping("/taken")
+    public ResponseEntity<List<OfferResponseDTO>> getTakenOffers() {
+        return ResponseEntity.ok(offerService.getTakenOffers());
+    }
 }
