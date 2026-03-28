@@ -67,4 +67,11 @@ public class OfferService {
                 .psychologistId(offer.getPsychologistId())
                 .build();
     }
+
+    public List<OfferResponseDTO> getTakenOffers(){
+        return offerRepository.findByStatus(OfferStatus.TAKEN)
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
 }
