@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: offerDB
+      POSTGRES_USER: jacobo
+      POSTGRES_PASSWORD: jacobo123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  offer-service:
+    build: .
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/offerDB
+      SPRING_DATASOURCE_USERNAME: jacobo
+      SPRING_DATASOURCE_PASSWORD: jacobo123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
