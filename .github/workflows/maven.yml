@@ -7,10 +7,24 @@ on:
     branches: [ "main", "develop" ]
 
 jobs:
-
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: offerDB
+          POSTGRES_USER: jacobo
+          POSTGRES_PASSWORD: jacobo123
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -28,6 +42,10 @@ jobs:
 
       - name: Test + JaCoCo
         run: mvn verify -q
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/offerDB
+          SPRING_DATASOURCE_USERNAME: jacobo
+          SPRING_DATASOURCE_PASSWORD: jacobo123
 
       - name: Upload JaCoCo report
         uses: actions/upload-artifact@v4
