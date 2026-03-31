@@ -4,6 +4,8 @@ import com.mindbridge.offer_service.dto.OfferRequestDTO;
 import com.mindbridge.offer_service.dto.OfferResponseDTO;
 import com.mindbridge.offer_service.model.entity.Offer;
 import com.mindbridge.offer_service.model.enums.OfferStatus;
+import com.mindbridge.offer_service.model.enums.PatientDiscount;
+import com.mindbridge.offer_service.model.enums.VisibilityMultiplier;
 import com.mindbridge.offer_service.repository.OfferRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,10 @@ public class OfferService {
     public OfferResponseDTO createOffer(OfferRequestDTO dto){
         Offer offer = Offer.builder().
                 title(dto.getTitle())
+                .description(dto.getDescription())
+                .benefits(dto.getBenefits())
+                .boostMultiplier(VisibilityMultiplier.fromValue(dto.getBoostMultiplier()))
+                .discountPercent(PatientDiscount.fromValue(dto.getDiscountPercent()))
                 .startDate(dto.getStartDate())
                 .endDate(dto.getEndDate())
                 .status(OfferStatus.OPEN)
@@ -61,6 +67,10 @@ public class OfferService {
         return OfferResponseDTO.builder()
                 .id(offer.getId())
                 .title(offer.getTitle())
+                .description(offer.getDescription())
+                .benefits(offer.getBenefits())
+                .discountPercent(offer.getDiscountPercent().getValue())
+                .boostMultiplier(offer.getBoostMultiplier().getValue())
                 .startDate(offer.getStartDate())
                 .endDate(offer.getEndDate())
                 .status(offer.getStatus())
