@@ -4,6 +4,8 @@ import com.mindbridge.offer_service.dto.OfferRequestDTO;
 import com.mindbridge.offer_service.dto.OfferResponseDTO;
 import com.mindbridge.offer_service.model.entity.Offer;
 import com.mindbridge.offer_service.model.enums.OfferStatus;
+import com.mindbridge.offer_service.model.enums.PatientDiscount;
+import com.mindbridge.offer_service.model.enums.VisibilityMultiplier;
 import com.mindbridge.offer_service.repository.OfferRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,9 +40,14 @@ class OfferServiceTest {
     void setUp() {
         offerId = UUID.randomUUID();
         psychologistId = UUID.randomUUID();
+
         offerOpen = Offer.builder()
                 .id(offerId)
                 .title("Oferta Marzo")
+                .description("Descripción test")
+                .benefits(List.of("Beneficio 1"))
+                .boostMultiplier(VisibilityMultiplier.X3)
+                .discountPercent(PatientDiscount.TWENTY)
                 .startDate(LocalDate.now().minusDays(1))
                 .endDate(LocalDate.now().plusDays(10))
                 .status(OfferStatus.OPEN)
@@ -53,6 +60,10 @@ class OfferServiceTest {
     void createOffer_debeRetornarOfertaCreada() {
         OfferRequestDTO dto = new OfferRequestDTO();
         dto.setTitle("Oferta Marzo");
+        dto.setDescription("Descripción test");
+        dto.setBenefits(List.of("Beneficio 1"));
+        dto.setBoostMultiplier(3);
+        dto.setDiscountPercent(20);
         dto.setStartDate(LocalDate.now().minusDays(1));
         dto.setEndDate(LocalDate.now().plusDays(10));
 
@@ -63,6 +74,8 @@ class OfferServiceTest {
         assertNotNull(response);
         assertEquals("Oferta Marzo", response.getTitle());
         assertEquals(OfferStatus.OPEN, response.getStatus());
+        assertEquals(3, response.getBoostMultiplier()); // ✅ validación extra
+        assertEquals(20, response.getDiscountPercent()); // ✅ validación extra
         verify(offerRepository, times(1)).save(any());
     }
 
@@ -117,6 +130,7 @@ class OfferServiceTest {
         assertNotNull(response);
         assertEquals(1, response.size());
         assertEquals(OfferStatus.OPEN, response.get(0).getStatus());
+        assertEquals(3, response.get(0).getBoostMultiplier()); // ✅ FIX
         verify(offerRepository, times(1)).findByStatus(OfferStatus.OPEN);
     }
 }
