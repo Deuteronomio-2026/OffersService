@@ -2,6 +2,8 @@ package com.mindbridge.offer_service.concurrency;
 
 import com.mindbridge.offer_service.model.entity.Offer;
 import com.mindbridge.offer_service.model.enums.OfferStatus;
+import com.mindbridge.offer_service.model.enums.PatientDiscount;
+import com.mindbridge.offer_service.model.enums.VisibilityMultiplier;
 import com.mindbridge.offer_service.repository.OfferRepository;
 import com.mindbridge.offer_service.service.OfferService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +39,8 @@ class ConcurrencyTest {
                 .startDate(LocalDate.now().minusDays(1))
                 .endDate(LocalDate.now().plusDays(10))
                 .status(OfferStatus.OPEN)
+                .boostMultiplier(VisibilityMultiplier.X3)
+                .discountPercent(PatientDiscount.TWENTY)
                 .version(0L)
                 .build();
         offerId = offerRepository.save(offer).getId();
