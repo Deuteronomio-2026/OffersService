@@ -70,3 +70,26 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ env.OWNER }}/offer-service:latest
+
+  deploy:
+    name: Deploy to Azure
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Container Apps
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }}
+          acrName: ghcr.io
+          containerAppName: offer-service
+          resourceGroup: offer-service-rg
+          imageToDeploy: ghcr.io/deuteronomio-2026/offer-service:latest
+          registryUrl: ghcr.io
+          registryUsername: deuteronomio-2026
+          registryPassword: ${{ secrets.REGISTRY_PAT }}
