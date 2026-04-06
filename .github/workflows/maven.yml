@@ -83,13 +83,10 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Container Apps
-        uses: azure/container-apps-deploy-action@v1
+        uses: azure/CLI@v1
         with:
-          appSourcePath: ${{ github.workspace }}
-          acrName: ghcr.io
-          containerAppName: offer-service
-          resourceGroup: offer-service-rg
-          imageToDeploy: ghcr.io/deuteronomio-2026/offer-service:latest
-          registryUrl: ghcr.io
-          registryUsername: deuteronomio-2026
-          registryPassword: ${{ secrets.REGISTRY_PAT }}
+          inlineScript: |
+            az containerapp update \
+              --name offer-service \
+              --resource-group offer-service-rg \
+              --image ghcr.io/deuteronomio-2026/offer-service:latest
