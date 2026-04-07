@@ -84,4 +84,10 @@ public class OfferService {
                 .map(this::toResponseDTO)
                 .toList();
     }
+
+    public void deleteOffer(UUID offerId){
+        Offer offer = offerRepository.findById(offerId)
+                        .orElseThrow(() -> new RuntimeException("Oferta no encontrada"));
+        offerRepository.delete(offer);
+    }
 }
