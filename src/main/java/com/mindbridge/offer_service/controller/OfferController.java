@@ -92,4 +92,20 @@ public class OfferController {
     public ResponseEntity<List<OfferResponseDTO>> getTakenOffers() {
         return ResponseEntity.ok(offerService.getTakenOffers());
     }
+
+    @Operation(
+            summary = "Eliminar oferta",
+            description = "Elimina permanentemente una oferta existente. Solo administradores."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Oferta eliminada exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Oferta no encontrada")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOffer(
+            @Parameter(description = "ID de la oferta a eliminar") @PathVariable UUID id) {
+        offerService.deleteOffer(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
