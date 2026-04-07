@@ -90,4 +90,11 @@ public class OfferService {
                         .orElseThrow(() -> new RuntimeException("Oferta no encontrada"));
         offerRepository.delete(offer);
     }
+
+    public List<OfferResponseDTO> getAll(){
+        List<Offer> offers = offerRepository.findAll();
+        return offers.stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
 }

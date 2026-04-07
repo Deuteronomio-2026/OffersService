@@ -108,4 +108,12 @@ public class OfferController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Obtener todas las ofertas", description = "Retorna todas las ofertas sin filtrar (solo administradores)")
+    @GetMapping
+    public ResponseEntity<List<OfferResponseDTO>> getAllOffers() {
+        return ResponseEntity.ok(offerService.getAll());
+    }
+
+
+
 }
