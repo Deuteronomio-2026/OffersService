@@ -8,8 +8,10 @@ import com.mindbridge.offer_service.repository.OfferRepository;
 import com.mindbridge.offer_service.service.OfferService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -28,6 +30,9 @@ class ConcurrencyTest {
 
     @Autowired
     private OfferRepository offerRepository;
+
+    @MockBean
+    private RabbitTemplate rabbitTemplate;  // ← mockea RabbitMQ para no necesitar conexión real
 
     private UUID offerId;
 
