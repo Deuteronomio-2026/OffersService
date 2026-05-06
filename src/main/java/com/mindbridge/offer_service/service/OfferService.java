@@ -8,6 +8,8 @@ import com.mindbridge.offer_service.model.enums.PatientDiscount;
 import com.mindbridge.offer_service.model.enums.VisibilityMultiplier;
 import com.mindbridge.offer_service.repository.OfferRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +21,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OfferService {
     private final OfferRepository offerRepository;
+    private final RabbitTemplate rabbitTemplate;
+
+    @Value("${rabbitmq.exchange}")
+    private String exchange;
+
+    @Value("${rabbitmq.routing-key.offer-created}")
+    private String offerCreatedRoutingKey;
 
     public OfferResponseDTO createOffer(OfferRequestDTO dto){
-        Offer offer = Offer.builder().
-                title(dto.getTitle())
+        Offer offer = Offer.builder()
+                .title(dto.getTitle())
                 .description(dto.getDescription())
                 .benefits(dto.getBenefits())
                 .boostMultiplier(VisibilityMultiplier.fromValue(dto.getBoostMultiplier()))
@@ -32,27 +41,38 @@ public class OfferService {
                 .status(OfferStatus.OPEN)
                 .build();
         Offer saved = offerRepository.save(offer);
+
+        //  Publicar evento
+        rabbitTemplate.convertAndSend(exchange, offerCreatedRoutingKey, toResponseDTO(saved));
+
         return toResponseDTO(saved);
     }
+
     @Transactional
     public OfferResponseDTO cancelOffer(UUID id){
         Offer offer = offerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Oferta no encontrada"));
         offer.cancel();
         Offer saved = offerRepository.save(offer);
+
+        // Publicar evento
+        rabbitTemplate.convertAndSend(exchange, "offer.cancelled", toResponseDTO(saved));
+
         return toResponseDTO(saved);
-
-
     }
 
     public OfferResponseDTO subscribePsychologist(UUID offerId, UUID psychologistId){
-        if(offerRepository.existsByPsychologistIdAndStatus(psychologistId,OfferStatus.TAKEN)){
+        if(offerRepository.existsByPsychologistIdAndStatus(psychologistId, OfferStatus.TAKEN)){
             throw new IllegalStateException("El psicólogo ya tiene una oferta activa");
         }
         Offer offer = offerRepository.findByIdWithLock(offerId)
-                    .orElseThrow(() -> new RuntimeException("Oferta no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Oferta no encontrada"));
         offer.subscribe(psychologistId);
         Offer saved = offerRepository.save(offer);
+
+        // Publicar evento
+        rabbitTemplate.convertAndSend(exchange, "offer.taken", toResponseDTO(saved));
+
         return toResponseDTO(saved);
     }
 
