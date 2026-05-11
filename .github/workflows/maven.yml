@@ -1,16 +1,13 @@
 name: CI — offer-service
-
 on:
   push:
     branches: [ "main", "develop", "feature/**" ]
   pull_request:
     branches: [ "main", "develop" ]
-
 jobs:
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:15
@@ -25,7 +22,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,3 +50,43 @@ jobs:
           name: jacoco-report
           path: target/site/jacoco/
           retention-days: 7
+
+      - name: Set lowercase owner
+        if: github.ref == 'refs/heads/main'
+        run: echo "OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        if: github.ref == 'refs/heads/main'
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ env.OWNER }}/offer-service:latest
+
+  deploy:
+    name: Deploy to Azure
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Container Apps
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az containerapp update \
+              --name offer-service \
+              --resource-group offer-service-rg \
+              --image ghcr.io/deuteronomio-2026/offer-service:latest
