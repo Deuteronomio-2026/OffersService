@@ -42,6 +42,7 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/offerDB
           SPRING_DATASOURCE_USERNAME: jacobo
           SPRING_DATASOURCE_PASSWORD: jacobo123
+          RABBITMQ_URL: ${{ secrets.RABBITMQ_URL }}
 
       - name: Upload JaCoCo report
         uses: actions/upload-artifact@v4
