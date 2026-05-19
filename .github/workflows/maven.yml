@@ -44,6 +44,11 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: jacobo123
           RABBITMQ_URL: ${{ secrets.RABBITMQ_URL }}
 
+      - name: SonarCloud Analysis
+        run: mvn sonar:sonar -Dsonar.projectKey=Deuteronomio-2026_OffersService -Dsonar.organization=deuteronomio-2026 -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
       - name: Upload JaCoCo report
         uses: actions/upload-artifact@v4
         if: always()
@@ -87,7 +92,8 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
             az containerapp update \
               --name offer-service \
               --resource-group offer-service-rg \
-              --image ghcr.io/deuteronomio-2026/offer-service:latest
+              --image ghcr.io/$OWNER/offer-service:latest
